@@ -5,7 +5,6 @@ var cellsToAnimate = [];
 var createWalls = false;
 var algorithm = "D* Algorithm";
 var justFinished = false;
-var animationSpeed = "Fast";
 var animationState = null;
 var startCell = [5, 20]; //the green cell
 var endCell = [20, 20]; //the red cell
@@ -57,75 +56,6 @@ function Queue() {
   };
   this.clear = function () {
     this.stack = new Array();
-    return;
-  };
-}
-
-function minHeap() {
-  this.heap = [];
-  this.isEmpty = function () {
-    return this.heap.length == 0;
-  };
-  this.clear = function () {
-    this.heap = [];
-    return;
-  };
-  this.getMin = function () {
-    if (this.isEmpty()) {
-      return null;
-    }
-    var min = this.heap[0];
-    this.heap[0] = this.heap[this.heap.length - 1];
-    this.heap[this.heap.length - 1] = min;
-    this.heap.pop();
-    if (!this.isEmpty()) {
-      this.siftDown(0);
-    }
-    return min;
-  };
-  this.push = function (item) {
-    this.heap.push(item);
-    this.siftUp(this.heap.length - 1);
-    return;
-  };
-  this.parent = function (index) {
-    if (index == 0) {
-      return null;
-    }
-    return Math.floor((index - 1) / 2);
-  };
-  this.children = function (index) {
-    return [index * 2 + 1, index * 2 + 2];
-  };
-  this.siftDown = function (index) {
-    var children = this.children(index);
-    var leftChildValid = children[0] <= this.heap.length - 1;
-    var rightChildValid = children[1] <= this.heap.length - 1;
-    var newIndex = index;
-    if (leftChildValid && this.heap[newIndex][0] > this.heap[children[0]][0]) {
-      newIndex = children[0];
-    }
-    if (rightChildValid && this.heap[newIndex][0] > this.heap[children[1]][0]) {
-      newIndex = children[1];
-    }
-    // No sifting down needed
-    if (newIndex === index) {
-      return;
-    }
-    var val = this.heap[index];
-    this.heap[index] = this.heap[newIndex];
-    this.heap[newIndex] = val;
-    this.siftDown(newIndex);
-    return;
-  };
-  this.siftUp = function (index) {
-    var parent = this.parent(index);
-    if (parent !== null && this.heap[index][0] < this.heap[parent][0]) {
-      var val = this.heap[index];
-      this.heap[index] = this.heap[parent];
-      this.heap[parent] = val;
-      this.siftUp(parent);
-    }
     return;
   };
 }
@@ -185,11 +115,7 @@ $("td").mouseenter(function () {
       justFinished = False;
     }
 
-    if (movingStart && index != endCellIndex) {
-      moveStartOrEnd(startCellIndex, index, "start");
-    } else if (movingEnd && index != startCellIndex) {
-      moveStartOrEnd(endCellIndex, index, "end");
-    } else if (index != startCellIndex && index != endCellIndex) {
+    if (index != startCellIndex && index != endCellIndex) {
       $(this).toggleClass("wall");
     }
   }
@@ -223,23 +149,19 @@ Buttons
 //activating the start button
 
 $("#startBtn").click(function () {
-  if (algorithm == null) {
-    //if no algorithm has been selected, then it will not work
-    return;
-  }
   if (inProgress) {
     // if the algorithm is running
-    update("wait");
+    // update("wait");
     return;
   }
-  traverseGraph(algorithm);
+  traverseGraph();
 });
 
 //activating the end button
 
 $("#clearBtn").click(function () {
   if (inProgress) {
-    update("wait");
+    // update("wait");
     return;
   } // if the user presses the button while the algorithm is still going on, then display the error message!
   clearBoard((keepWalls = false)); //else, we will call the clear board function, with specification like dont keep the walls, remove them also
@@ -251,101 +173,13 @@ Functions
 -------------------
 */
 
-//This function is created for moving the Starting pointer or the ending pointer.
-
-function moveStartOrEnd(prevIndex, newIndex, startOrEnd) {
-  var newCellY = newIndex % totalCols;
-  var newCellX = Math.floor((newIndex - newCellY) / totalCols);
-
-  if (startOrEnd == "start") {
-    startCell = [newCellX, newCellY];
-    console.log("Moving start to [" + newCellX + "," + newCellY + "]");
-  } else {
-    endCell = [newCellX, newCellY];
-    console.log("Moving end to [" + newCellX + "," + newCellY + "]");
-  }
-  clearBoard((keepWalls = true));
-  return;
-}
-
-//This function is used to move the end pointer
-function moveEnd(prevIndex, newIndex) {
-  $($("td").find(prevIndex)).removeClass();
-
-  var newEnd = $("td").find(newIndex);
-  $(newEnd).removeClass();
-  $(newEnd).addClass("end");
-
-  var newEndX = Math.floor(newIndex / totalRows);
-  var newEndY = Math.floor(newIndex / totalCols);
-  startCell = [newStartX, newStartY];
-  return;
-}
-
-//For displaying error messages
-function update(message) {
-  // $("#resultsIcon").removeClass();
-  // $("#resultsIcon").addClass("fas fa-exclamation");
-  // $("#results").css("background-color","#ffffff");
-  $("#duration").text("!");
-  if (message == "wait") {
-    $("#length").text("Please wait for the Algorithm to finish!");
-  }
-}
-
-// For displaying results
-function updateResults(duration, pathFound, length) {
-  // var firstAnimation = "swashOut";
-  // var secondAnimation = "swashIn";
-  // $("#results").removeClass();
-  // $("#results").addClass("magictime "+firstAnimation);
-  setTimeout(function () {
-    // $("#resultsIcon").removeClass();
-    if (pathFound) {
-      $("#results").css("background-color", "green");
-      // $("resultsIcon").addClass("fas fa-check");
-    } else {
-      $("#results").css("background-color", "#ff6961");
-      //$("#resultsIcon").addClass("fas fa-times");
-    }
-    $("#duration").text("Duration: " + duration + "ms");
-    $("#length").text("Length: " + length + " units");
-    // $("#results").removeClass(firstAnimation);
-    // $("#results").addClass(secondAnimation);
-
-    if (length === 0) {
-      alert("No path found!");
-    }
-  }, 1100);
-}
-
-//counting length of the successful path
-
-function countLength() {
-  var cells = $("td");
-  var l = 0;
-  for (var i = 0; i < cells.length; i++) {
-    if ($(cells[i]).hasClass("success")) {
-      l++;
-    }
-  }
-  return l;
-}
-
 //Preparing the Grid for grpah traversal
 
-async function traverseGraph(algorithm) {
+async function traverseGraph() {
   inProgress = true;
   clearBoard((keepWalls = true));
-  var startTime = Date.now();
-  var pathFound = executeAlgo();
-  var endTime = Date.now();
+  executeAlgo();
   await animateCells();
-  if (pathFound) {
-    updateResults(endTime - startTime, true, countLength());
-  } else {
-    updateResults(endTime - startTime, false, countLength());
-  }
   inProgress = false;
   justFinished = true;
 }
@@ -472,19 +306,6 @@ function makeWalls() {
   return walls;
 }
 
-//checking if the neighbor of any traversing node is a Wall?
-function neighborsThatAreWalls(neighbors, walls) {
-  var neighboringWalls = 0;
-  for (var k = 0; k < neighbors.length; k++) {
-    var i = neighbors[k][0];
-    var j = neighbors[k][1];
-    if (walls[i][j]) {
-      neighboringWalls++;
-    }
-  }
-  return neighboringWalls;
-}
-
 function createPrev() {
   var prev = [];
   for (var i = 0; i < totalRows; i++) {
@@ -520,7 +341,7 @@ async function animateCells() {
   var cells = $("#tableContainer").find("td");
   var startCellIndex = startCell[0] * totalCols + startCell[1];
   var endCellIndex = endCell[0] * totalCols + endCell[1];
-  var delay = getDelay();
+  var delay = 5;
   for (var i = 0; i < cellsToAnimate.length; i++) {
     var cellCoordinates = cellsToAnimate[i][0];
     var x = cellCoordinates[0];
@@ -543,25 +364,6 @@ async function animateCells() {
   return new Promise((resolve) => resolve(true));
 }
 
-function getDelay() {
-  var delay;
-  if (animationSpeed === "Slow") {
-    {
-      delay = 20;
-    }
-  } else if (animationSpeed === "Normal") {
-    {
-      delay = 10;
-    }
-  } else if (animationSpeed == "Fast") {
-    {
-      delay = 5;
-    }
-  }
-  console.log("Delay = " + delay);
-  return delay;
-}
-
 function clearBoard(keepWalls) {
   var cells = $("#tableContainer").find("td");
   var startCellIndex = startCell[0] * totalCols + startCell[1];
@@ -580,11 +382,3 @@ function clearBoard(keepWalls) {
 }
 
 clearBoard();
-
-$("#myModal").on("shown.bs.modal", function () {
-  $("#myInput").trigger("focus");
-});
-
-$(window).on("load", function () {
-  $("#exampleModalLong").modal("show");
-});
