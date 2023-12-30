@@ -109,7 +109,6 @@ $("td").mouseenter(function () {
   var startCellIndex = startCell[0] * totalCols + startCell[1];
   var endCellIndex = endCell[0] * totalCols + endCell[1];
   if (!inProgress) {
-    //if the process has finished
     if (justFinished) {
       clearBoard((keepWalls = true)); //we would keep the walls even though the process has finished
       justFinished = False;
@@ -121,7 +120,6 @@ $("td").mouseenter(function () {
   }
 });
 
-//this will help in dragging the click on any of the empty cell and making every draged/hovered cell to be a wall
 $("td").click(function () {
   var index = $("td").index(this);
   var startCellIndex = startCell[0] * totalCols + startCell[1];
