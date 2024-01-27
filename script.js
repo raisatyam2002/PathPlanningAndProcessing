@@ -5,7 +5,7 @@ var cellsToAnimate = [];
 var createWalls = false;
 var algorithm = "D* Algorithm";
 var justFinished = false;
-var animationState = null;
+// var animationState = null;
 var startCell = [5, 20]; //the green cell
 var endCell = [20, 20]; //the red cell
 var movingStart = false;
@@ -111,7 +111,7 @@ $("td").mouseenter(function () {
   if (!inProgress) {
     if (justFinished) {
       clearBoard((keepWalls = true)); //we would keep the walls even though the process has finished
-      justFinished = False;
+      justFinished = false;
     }
 
     if (index != startCellIndex && index != endCellIndex) {
@@ -191,22 +191,22 @@ function executeAlgo() {
 
 //Function to retain the walls while traversing the algorithm
 
-function makewall(cell) {
-  if (!createWalls) {
-    return;
-  }
-  var index = $("td").index(cell);
-  var row = Math.floor(index / totalRows) + 1;
-  var col = (index % totalCols) + 1;
-  console.log([row, col]);
-  if (
-    inProgress == false &&
-    !(row == 1 && col == 1) &&
-    !(row == totalRows && col == totalCols)
-  ) {
-    $(cell).toggleClass("wall");
-  }
-}
+// function makewall(cell) {
+//   if (!createWalls) {
+//     return;
+//   }
+//   var index = $("td").index(cell);
+//   var row = Math.floor(index / totalRows) + 1;
+//   var col = (index % totalCols) + 1;
+//   console.log([row, col]);
+//   if (
+//     inProgress == false &&
+//     !(row == 1 && col == 1) &&
+//     !(row == totalRows && col == totalCols)
+//   ) {
+//     $(cell).toggleClass("wall");
+//   }
+// }
 
 //Function to make or consider a cell to be visited
 
@@ -292,17 +292,17 @@ function A() {
   return pathFound;
 }
 
-function makeWalls() {
-  var walls = [];
-  for (var i = 0; i < totalRows; i++) {
-    var row = [];
-    for (var j = 0; j < totalCols; j++) {
-      row.push(true);
-    }
-    walls.push(row);
-  }
-  return walls;
-}
+// function makeWalls() {
+//   var walls = [];
+//   for (var i = 0; i < totalRows; i++) {
+//     var row = [];
+//     for (var j = 0; j < totalCols; j++) {
+//       row.push(true);
+//     }
+//     walls.push(row);
+//   }
+//   return walls;
+// }
 
 function createPrev() {
   var prev = [];
@@ -335,7 +335,7 @@ function getNeighbors(i, j) {
 }
 
 async function animateCells() {
-  animationState = null;
+  // animationState = null;
   var cells = $("#tableContainer").find("td");
   var startCellIndex = startCell[0] * totalCols + startCell[1];
   var endCellIndex = endCell[0] * totalCols + endCell[1];
